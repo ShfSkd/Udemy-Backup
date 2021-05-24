@@ -11,7 +11,7 @@ public class Enemy : MonoBehaviour
 	private void Start()
 	{
 		bank = FindObjectOfType<Bank>();
-		Debug.Log("123");
+		Debug.Log("1212");
 	}
 
 	public void RewardGold()
