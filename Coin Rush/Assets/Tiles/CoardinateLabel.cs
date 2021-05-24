@@ -30,7 +30,7 @@ public class CoardinateLabel : MonoBehaviour
 			DispalyCoordinets();
 			UpdateObjectName();
 		}
-		SetLabelColor();
+		SetLabelColor() ;
 		ToggleLabels();
 
 	}
