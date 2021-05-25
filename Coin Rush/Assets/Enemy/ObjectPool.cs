@@ -29,6 +29,7 @@ public class ObjectPool : MonoBehaviour
 		{
 			pool[i]= Instantiate(enemyPrefab, transform);
 			pool[i].SetActive(false);
+			Debug.Log(transform.position.ToString());
 		}
 	}
 

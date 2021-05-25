@@ -5,43 +5,50 @@ using UnityEngine;
 [RequireComponent(typeof(Enemy ))]
 public class EnemyMover : MonoBehaviour
 {
-	[SerializeField] List<Waypoint> path = new List<Waypoint>();
 	[SerializeField] [Range(0,5f)] float speed = 1;
+	 List<Node> path = new List<Node>();
 
 	Enemy enemy;
+	GridManager gridManager;
+	PathFinder pathFinder;
 	private void OnEnable()
 	{
-		FindPath();
 		ReturnToStart(); 
-		StartCoroutine(FollowPath());	
+		RecalculatePath(true);
 	}
-	private void Start()
+	private void Awake()
 	{
 		enemy = GetComponent<Enemy>();
+		gridManager = FindObjectOfType<GridManager>();
+		pathFinder = FindObjectOfType<PathFinder>();
 	}
-	void FindPath()
+	void RecalculatePath(bool resetPath)
 	{
-		path.Clear();
+		Vector2Int coordinates = new Vector2Int();
 
-		GameObject parent = GameObject.FindGameObjectWithTag("Path");
-
-		foreach (Transform child in parent.transform)
+		if (resetPath)
 		{
-			Waypoint waypoint = child.GetComponent<Waypoint>();
-			if (waypoint != null)
-				path.Add(waypoint);
+			coordinates = pathFinder.StartCoordinates;
 		}
+		else
+		{
+			coordinates = gridManager.GetCoordinateFromPosition(transform.position);
+		}
+		StopAllCoroutines();
+		path.Clear();
+		path = pathFinder.GetNewPath(coordinates);
+		StartCoroutine(FollowPath());	
 	}
 	void ReturnToStart()
 	{
-		transform.position = path[0].transform.position;
+		transform.position = gridManager.GetPositionFromCoordinates(pathFinder.StartCoordinates);
 	}
 	IEnumerator FollowPath()
 	{
-		foreach (Waypoint waypoint in path)
+		for (int i = 1; i < path.Count; i++)
 		{
 			Vector3 startPos = transform.position;
-			Vector3 endPos = waypoint.transform.position;
+			Vector3 endPos = gridManager.GetPositionFromCoordinates(path[i].cordinates);
 			float travelPrecent = 0;
 
 			transform.LookAt(endPos);
@@ -51,10 +58,10 @@ public class EnemyMover : MonoBehaviour
 			{
 				travelPrecent += Time.deltaTime * speed;
 				transform.position = Vector3.Lerp(startPos, endPos, travelPrecent);
-
 				yield return new WaitForEndOfFrame();
 			}
 		}
+		pathFinder.NotifyReciver();
 		FinishPath();
 	}
 
